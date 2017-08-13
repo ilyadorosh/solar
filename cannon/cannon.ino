@@ -76,7 +76,7 @@ void Shooter::cycle() {
   long curTime = micros();
 
   if (curTime - lastActionTimeUs > curWaitUs) {
-    curTime = lastActionTimeUs;
+    lastActionTimeUs = curTime;
     laserOn = !laserOn;
     digitalWrite(laserPin, laserOn);
     curWaitUs = laserOn ? intervalOn : intervalOff;
