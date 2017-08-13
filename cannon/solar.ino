@@ -29,8 +29,7 @@ int ledState = LOW;             // ledState used to set the LED
 unsigned long previousMicros = 0;        // will store last time LED was updated
 
 // constants won't change:
-const long intervalOn = 1;           // interval at which the laser is on (microseconds)
-const long intervalOff = 1;           // interval at which the laser is off (microseconds)
+
 long interval = intervalOff;
 //=========================== ==========
 
@@ -39,6 +38,26 @@ int buttonState = 0;         // variable for reading the pushbutton status
 unsigned long duration;
 int health = 100;
 
+
+class Shoter {
+  void shoot() {
+    
+  }
+
+  void cycle();
+
+ private:
+  static const long intervalOn = 1000;           // interval at which the laser is on (microseconds)
+  static const long intervalOff = 1000;          // interval at which the laser is off (microseconds)
+  static const long shootIntervalMs = 80;        // Shooting interval.
+  static const long shootPeriod = 100;           // Must be greater than 'shootIntervalMs'.
+
+  static bool shooting;
+};
+
+void Shooter::cycle() {
+  
+}
 
 void setup() {
   // initialize the LED pin as an output:
@@ -50,13 +69,13 @@ void setup() {
     // initialize the solar Vsol pin as an input:
   pinMode(heartPin, INPUT);
   // initialize serial communication:
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 void loop() {
   // read the state of the pushbutton value:
   buttonState = digitalRead(buttonPin);
-  Serial.println(duration);
+  // Serial.println(duration);
 
   // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
   // if (buttonState == HIGH) {
@@ -66,8 +85,9 @@ void loop() {
   //   // turn LED off:
   //   digitalWrite(laserPin, LOW);
   // }
+  
   blink1();
-  isHit();
+  // isHit();
 }
 
 void blink1(){
