@@ -18,23 +18,14 @@ const int buttonPin = 2;     // the number of the pushbutton pin
 const int laserPin =  12;      // the number of the LED pin
 const int heartPin =  A1;      // the number of the LED pin
 
-const int buzzerPin = 6;     // buzzer pin
+// const int buzzerPin = 6;     // buzzer pin
 
-// TODO: Remove:
-const long intervalOn = 1000;           // interval at which the laser is on (microseconds)
-const long intervalOff = 1000;          // interval at which the laser is off (microseconds)
+
+const long firePeriodMs = 300;
+
 
 //=========================== blink without the delay ======
-// Variables will change:
-int ledState = LOW;             // ledState used to set the LED
 
-// Generally, you should use "unsigned long" for variables that hold time
-// The value will quickly become too large for an int to store
-unsigned long previousMicros = 0;        // will store last time LED was updated
-
-// constants won't change:
-
-long interval = intervalOff;
 //=========================== ==========
 
 // variables will change:
@@ -44,56 +35,85 @@ int health = 100;
 
 
 class Shooter {
+ public:
   void shoot() {
-    
+    if (millis() - startShootingMs > shootPeriod) {
+      shooting = true;
+      startShootingMs = millis();
+      // Force it to turn on the laser on the next cycle:
+      lastActionTimeUs = micros() - intervalOff - 1;
+    }
+  }
+
+  long getStartShootingMs() { 
+    return startShootingMs;
   }
 
   void cycle();
-
  private:
   static const long intervalOn = 1000;           // interval at which the laser is on (microseconds)
   static const long intervalOff = 1000;          // interval at which the laser is off (microseconds)
   static const long shootIntervalMs = 80;        // Shooting interval.
   static const long shootPeriod = 100;           // Must be greater than 'shootIntervalMs'.
 
-  static bool shooting;
+  bool shooting;
+  bool laserOn;
+  long startShootingMs;
+  long lastActionTimeUs;
+  long curWaitUs;
 };
 
 void Shooter::cycle() {
-  
+  if (!shooting) {
+    return;
+  }
+
+  if (!laserOn && millis() - startShootingMs > shootIntervalMs) {
+    shooting = false;
+    return;
+  }
+
+  long curTime = micros();
+
+  if (curTime - lastActionTimeUs > curWaitUs) {
+    curTime = lastActionTimeUs;
+    laserOn = !laserOn;
+    digitalWrite(laserPin, laserOn);
+    curWaitUs = laserOn ? intervalOn : intervalOff;
+  }
 }
+
+Shooter shooter;
 
 void setup() {
   // initialize the LED pin as an output:
   pinMode(laserPin, OUTPUT);
   // initialize the buzzer pin as an output:
-  pinMode(buzzerPin, OUTPUT);
+  //pinMode(buzzerPin, OUTPUT);
   // initialize the pushbutton pin as an input:
-  pinMode(buttonPin, INPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
     // initialize the solar Vsol pin as an input:
   pinMode(heartPin, INPUT);
   // initialize serial communication:
   Serial.begin(115200);
 }
 
+// bool prevButtonState = false;
+
 void loop() {
   // read the state of the pushbutton value:
-  buttonState = digitalRead(buttonPin);
-  // Serial.println(duration);
+  // buttonState = digitalRead(buttonPin);
+  // bool shoot = (!buttonState && prevButtonState);
+  // prevButtonState = buttonState;
 
-  // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
-  // if (buttonState == HIGH) {
-  //   // turn LED on:
-  //   blink1();
-  // } else {
-  //   // turn LED off:
-  //   digitalWrite(laserPin, LOW);
-  // }
+  if (millis() - shooter.getStartShootingMs() > firePeriodMs) {
+    shooter.shoot();
+  }
   
-  blink1();
-  // isHit();
+  shooter.cycle();
 }
 
+/*
 void blink1(){
   // check to see if it's time to blink the LED; that is, if the difference
   // between the current time and last time you blinked the LED is bigger than
@@ -117,14 +137,5 @@ void blink1(){
     digitalWrite(laserPin, ledState);
   }
 }
+*/
 
-void isHit(){
-  
-  //solarDC = analogRead(heartPin);   
-  duration = pulseIn(heartPin, LOW, 1100);
-  if (duration >= 300) {
-    // beep:
-    //tone(buzzerPin, solarDC*100, 2000);
-    //health--;
-  }
-}
