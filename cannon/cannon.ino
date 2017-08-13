@@ -20,6 +20,10 @@ const int heartPin =  A1;      // the number of the LED pin
 
 const int buzzerPin = 6;     // buzzer pin
 
+// TODO: Remove:
+const long intervalOn = 1000;           // interval at which the laser is on (microseconds)
+const long intervalOff = 1000;          // interval at which the laser is off (microseconds)
+
 //=========================== blink without the delay ======
 // Variables will change:
 int ledState = LOW;             // ledState used to set the LED
@@ -39,7 +43,7 @@ unsigned long duration;
 int health = 100;
 
 
-class Shoter {
+class Shooter {
   void shoot() {
     
   }
