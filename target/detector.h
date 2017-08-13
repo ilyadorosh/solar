@@ -1,15 +1,7 @@
-#include "arduinoFFT.h"
+#ifndef DETECTOR_H
+#define DETECTOR_H
 
-void center(double *values, int len) {
-  double sum = 0;
-  for (int i = 0; i < len; i++) {
-    sum += values[i];
-  }
-  double mean = sum / len;
-  for (int i = 0; i < len; i++) {
-    values[i] -= mean;
-  }
-}
+#include "arduinoFFT.h"
 
 class Detector {
  public:
@@ -53,60 +45,6 @@ class Detector {
   bool fftRun;
 };
 
-void Detector::runFFT() {
-  if (fftRun) {
-    return;
-  }
-  center(vReal, NUM_SAMPLES);
-  fft.Windowing(vReal, NUM_SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
-  fft.Compute(vReal, vImag, NUM_SAMPLES, FFT_FORWARD);
-  fft.ComplexToMagnitude(vReal, vImag, NUM_SAMPLES);
-  fftRun = true;
-}
+extern Detector detector;
 
-Detector detector;
-
-//bool checkForShot() {
-  
-//}
-
-void setup() {
-  Serial.begin(115200);
-  pinMode(2, INPUT_PULLUP);
-  while (!Serial) {}
-  //Serial.println("Waiting for the button ...");
-}
-
-void loop() {
-  long startRead = micros();
-  short val = analogRead(A0);
-  /*
-  bool buttonOff = digitalRead(2);
-  if (buttonOff) {
-    detector.reset();
-    return;
-  }
-  */
-
-  long endTime = micros();
-  detector.addSample(val, startRead);
-
-  if (!detector.isFull()) {
-    return;
-  }
-
-  detector.runFFT();
-
-  for (int i = 0; i < 100; i++) {
-    Serial.println(0);
-  }
-
-  double samplingFrequency = detector.samplingFreq(endTime);
-  for (int i = 0; i < detector.numFreqs(); i++) {
-    //Serial.print(i * samplingFrequency / Detector::NUM_SAMPLES);
-    //Serial.print(" ");
-    Serial.println(detector.getResult()[i]);
-  }
-
-  detector.reset();
-}
+#endif  // Header guard
