@@ -1,30 +1,46 @@
 #include "detector.h"
 
 const int redPin =  10;        // the number of the redLED pin
-const int greenPin =  11;      // the number of the greenLED pin
+const int greenPin =  9;      // the number of the greenLED pin
 const int solarPin =  A0;      // the number of the solar pin
+const int buzzerPin = 4;
 
-unsigned int health = 100;
+int health = 255;
+
+void setLeds(int health) {
+  if (health < 0) {
+    health = 0;
+  }
+  if (health > 255) {
+    health = 255;
+  }
+  analogWrite(redPin, health);
+  analogWrite(greenPin, 255 - health);
+}
 
 void setup() {
   Serial.begin(115200);
   pinMode(2, INPUT_PULLUP);
   pinMode(redPin, OUTPUT);
   pinMode(greenPin, OUTPUT);
-  while (!Serial) {}
+  digitalWrite(redPin, HIGH);
+  digitalWrite(greenPin, HIGH);
+  // while (!Serial) {}
   //Serial.println("Waiting for the button ...");
+  setLeds(health);
 }
+
+bool prevHit = false;
 
 void loop() {
   long startRead = micros();
   short val = analogRead(A0);
-  /*
-  bool buttonOff = digitalRead(2);
-  if (buttonOff) {
-    detector.reset();
-    return;
-  }
-  */
+  
+  //bool buttonOff = digitalRead(2);
+  //if (buttonOff) {
+  //  detector.reset();
+ //   return;
+ // }
 
   long endTime = micros();
   detector.addSample(val, startRead);
@@ -34,16 +50,18 @@ void loop() {
   }
 
   detector.runFFT();
-
-  if (checkForShot(detector)) {
-    Serial.println("SHOT!!!!!!!!!!!!!!!!!");
+  bool curHit = checkForShot(detector) && !prevHit;
+  prevHit = curHit;
+  
+  if (curHit) {
+    //Serial.println("SHOT!!!!!!!!!!!!!!!!!");
     if (health > 0) {
-      health -= 10;
+      tone(buzzerPin, 400, 50);
+      health -= 30;
     }   
   }
-  
-  analogWrite(200, redPin);
-  analogWrite(200, greenPin);
+
+  setLeds(health);
 
   /*
 

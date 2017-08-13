@@ -1,6 +1,6 @@
 #include "detector.h"
 
-const double DETECT_THRESHOLD = 400;
+const double DETECT_THRESHOLD = 300;
 
 void center(double *values, int len) {
   double sum = 0;
