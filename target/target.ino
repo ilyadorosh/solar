@@ -1,8 +1,16 @@
 #include "detector.h"
 
+const int redPin =  10;        // the number of the redLED pin
+const int greenPin =  11;      // the number of the greenLED pin
+const int solarPin =  A0;      // the number of the solar pin
+
+unsigned int health = 100;
+
 void setup() {
   Serial.begin(115200);
   pinMode(2, INPUT_PULLUP);
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
   while (!Serial) {}
   //Serial.println("Waiting for the button ...");
 }
@@ -29,7 +37,13 @@ void loop() {
 
   if (checkForShot(detector)) {
     Serial.println("SHOT!!!!!!!!!!!!!!!!!");
+    if (health > 0) {
+      health -= 10;
+    }   
   }
+  
+  analogWrite(200, redPin);
+  analogWrite(200, greenPin);
 
   /*
 
